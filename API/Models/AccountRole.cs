@@ -12,4 +12,8 @@ public class AccountRole
     public string AccountNik { get; set; }
     [Column("role_id", TypeName = "int")]
     public int RoleId { get; set; }
+
+    // Cardinality
+    public Account Account { get; set; }
+    public Role Role { get; set; }
 }
