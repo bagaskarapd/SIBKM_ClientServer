@@ -1,7 +1,8 @@
 ﻿using API.Models;
 using API.Repositories.Interface;
-using Microsoft.AspNetCore.Http;
+using API.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace API.Controllers;
 [Route("api/[controller]")]
@@ -18,41 +19,91 @@ public class UniversitieController : ControllerBase
     public ActionResult GetAll()
     {
         var universities = _universitieRepository.GetAll();
-        return Ok(universities);
+        return Ok(new ResponseDataVM<IEnumerable<Universitie>> {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Success",
+            Data = universities
+        });
     }
 
-    [HttpGet("ById")]
+    [HttpGet("{id}")]
     public ActionResult GetById(int id)
     {
         var universities = _universitieRepository.GetById(id);
         if (universities == null)
-            return NotFound();
-        return Ok(universities);
+            return NotFound(new ResponseErrorsVM<string>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Errors = "Id Not Found"
+            });
+        return Ok(new ResponseDataVM<Universitie>
+        {
+            Code = StatusCodes.Status200OK,
+            Status = HttpStatusCode.OK.ToString(),
+            Message = "Success",
+            Data = universities
+        });
     }
     [HttpPost]
     public ActionResult Insert(Universitie universitie)
     {
         if (universitie.Name == "" || universitie.Name.ToLower() == "string") {
-            return BadRequest("Value Cannot Be Null or Default");
+            return BadRequest(new ResponseErrorsVM<string>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Errors = "Value Cannot be Null or Default"
+            });
         }
 
         var insert = _universitieRepository.Insert(universitie);
         if (insert > 0)
-            return Ok("Insert Success");
-        return BadRequest("Insert Failed");
+            return Ok(new ResponseDataVM<Universitie>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Insert Success",
+                Data = null!
+            });
+        return BadRequest(new ResponseErrorsVM<string>
+        {
+            Code = StatusCodes.Status500InternalServerError,
+            Status = HttpStatusCode.InternalServerError.ToString(),
+            Errors = "Insert Failed / Lost Connection"
+        });
     }
 
     [HttpPut]
     public ActionResult Update(Universitie universitie)
     {
         if (universitie.Name == "" || universitie.Name.ToLower() == "string")
-            return BadRequest("Value Cannot Be Null or Default"); {
+        {
+            return BadRequest(new ResponseErrorsVM<string>
+            {
+                Code = StatusCodes.Status400BadRequest,
+                Status = HttpStatusCode.BadRequest.ToString(),
+                Errors = "Value Cannot be Null or Default"
+            });
         }
 
-        var Update = _universitieRepository.Update(universitie);
-        if (Update > 0)
-            return Ok("Update Success");
-        return BadRequest("Update Failed");
+        var update = _universitieRepository.Update(universitie);
+        if (update > 0)
+            return Ok(new ResponseDataVM<Universitie>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Update Success",
+                Data = null!
+            });
+
+        return BadRequest(new ResponseErrorsVM<string>
+        {
+            Code = StatusCodes.Status500InternalServerError,
+            Status = HttpStatusCode.InternalServerError.ToString(),
+            Errors = "Update Failed / Lost Connection"
+        });
     }
 
     [HttpDelete("{id}")]
@@ -60,8 +111,20 @@ public class UniversitieController : ControllerBase
     {
         var delete = _universitieRepository.Delete(id);
         if (delete > 0)
-            return Ok("Delete Success");
-        return BadRequest("Delete Failed");
+            return Ok(new ResponseDataVM<Universitie>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Delete Success",
+                Data = null!
+            });
+
+        return BadRequest(new ResponseErrorsVM<string>
+        {
+            Code = StatusCodes.Status500InternalServerError,
+            Status = HttpStatusCode.InternalServerError.ToString(),
+            Errors = "Delete Failed / Lost Connection"
+        });
     }
 }
 

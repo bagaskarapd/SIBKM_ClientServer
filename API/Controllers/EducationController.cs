@@ -1,8 +1,10 @@
 ﻿using API.Models;
 using API.Repositories.Data;
 using API.Repositories.Interface;
+using API.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace API.Controllers
 {
@@ -20,43 +22,95 @@ namespace API.Controllers
         public ActionResult GetAll()
         {
             var education = _educationRepository.GetAll();
-            return Ok(education);
+            return Ok(new ResponseDataVM<IEnumerable<Education>>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success",
+                Data = education
+            });
         }
 
-        [HttpGet("ById")]
+        [HttpGet("{id}")]
         public ActionResult GetById(int id)
         {
             var education = _educationRepository.GetById(id);
             if (education == null)
-                return NotFound();
-            return Ok(education);
+                return NotFound(new ResponseErrorsVM<string>
+                {
+                    Code = StatusCodes.Status404NotFound,
+                    Status = HttpStatusCode.NotFound.ToString(),
+                    Errors = "Id Not Found"
+                });
+
+            return Ok(new ResponseDataVM<Education>
+            {
+                Code = StatusCodes.Status200OK,
+                Status = HttpStatusCode.OK.ToString(),
+                Message = "Success",
+                Data = education
+            });
         }
         [HttpPost]
         public ActionResult Insert(Education education)
         {
             if (education.Major == "" || education.Major.ToLower() == "string")
             {
-                return BadRequest("Value Cannot Be Null or Default");
+                return BadRequest(new ResponseErrorsVM<string>
+                {
+                    Code = StatusCodes.Status400BadRequest,
+                    Status = HttpStatusCode.BadRequest.ToString(),
+                    Errors = "Value Cannot be Null or Default"
+                });
             }
 
             var insert = _educationRepository.insert(education);
             if (insert > 0)
-                return Ok("Insert Success");
-            return BadRequest("Insert Failed");
+                return Ok(new ResponseDataVM<Education>
+                {
+                    Code = StatusCodes.Status200OK,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Insert Success",
+                    Data = null!
+                });
+
+            return BadRequest(new ResponseErrorsVM<string>
+            {
+                Code = StatusCodes.Status500InternalServerError,
+                Status = HttpStatusCode.InternalServerError.ToString(),
+                Errors = "Insert Failed / Lost Connection"
+            });
         }
 
         [HttpPut]
         public ActionResult Update(Education education)
         {
             if (education.Major == "" || education.Major.ToLower() == "string")
-                return BadRequest("Value Cannot Be Null or Default");
+                return BadRequest(new ResponseErrorsVM<string>
+                {
+                    Code = StatusCodes.Status400BadRequest,
+                    Status = HttpStatusCode.BadRequest.ToString(),
+                    Errors = "Value Cannot be Null or Default"
+                });
             {
             }
 
             var Update = _educationRepository.update(education);
             if (Update > 0)
-                return Ok("Update Success");
-            return BadRequest("Update Failed");
+                return Ok(new ResponseDataVM<Education>
+                {
+                    Code = StatusCodes.Status200OK,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Update Success",
+                    Data = null!
+                });
+
+            return BadRequest(new ResponseErrorsVM<string>
+            {
+                Code = StatusCodes.Status500InternalServerError,
+                Status = HttpStatusCode.InternalServerError.ToString(),
+                Errors = "Update Failed / Lost Connection"
+            });
         }
 
         [HttpDelete("{id}")]
@@ -64,8 +118,20 @@ namespace API.Controllers
         {
             var Delete = _educationRepository.delete(id);
             if (Delete > 0)
-                return Ok("Delete Success");
-            return BadRequest("Delete Failed");
+                return Ok(new ResponseDataVM<Education>
+                {
+                    Code = StatusCodes.Status200OK,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Delete Success",
+                    Data = null!
+                });
+
+            return BadRequest(new ResponseErrorsVM<string>
+            {
+                Code = StatusCodes.Status500InternalServerError,
+                Status = HttpStatusCode.InternalServerError.ToString(),
+                Errors = "Delete Failed / Lost Connection"
+            });
         }
     }
 }
