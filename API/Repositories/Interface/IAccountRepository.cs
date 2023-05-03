@@ -1,13 +1,11 @@
 ﻿using API.Models;
+using API.ViewModels;
 
 namespace API.Repositories.Interface
 {
-    public interface IAccountRepository
+    public interface IAccountRepository : IGeneralRepository<Account, string>
     {
-        IEnumerable<Account> GetAll();
-        Account? GetById(int id);
-        int insert(Account account);
-        int update(Account account);
-        int delete(int id);
+        int Register(RegisterVM registerVM);
+        bool Login(LoginVM loginVm);
     }
 }

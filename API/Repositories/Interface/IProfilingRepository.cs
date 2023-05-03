@@ -2,12 +2,8 @@
 
 namespace API.Repositories.Interface
 {
-    public interface IProfilingRepository
+    public interface IProfilingRepository : IGeneralRepository<Profiling, string>
     {
-        IEnumerable<Profiling> GetAll();
-        Profiling? GetById(string id);
-        int insert(Profiling profiling);
-        int update(Profiling profiling);
-        int delete(string id);
+        
     }
 }
