@@ -78,10 +78,27 @@ namespace API.Repositories.Data
         public bool Login(LoginVM loginVM)
         {
             //Ambil data dari database berdasarkan Email di tabel employee
-            //Gabungkan data dari tabel employee dengan tabel account berdasarkan NIK
+            var employees = _context.Employees.FirstOrDefault(e => e.Email == loginVM.Email);
+            if (employees == null)
+            {
+                return false;
+            }
+            //Gabungkan data dari tabel employee dengan tabel account berdasarkan NIK 
+            var accounts = _context.Accounts.FirstOrDefault(e => e.EmployeeNIK == employees.NIK);
+            if (accounts == null)
+            {
+                return false;
+            }
             //Cocokan data tersebut dengan Password yang diinputkan
-            //Cek apakah data valid atau tidak
-            return false;
+            if (accounts.password != loginVM.Password)
+            {
+                return false;
+            }
+            return true;
         }
+        //Cek apakah data valid atau tidak
+
+
+
     }
-}
+    }
