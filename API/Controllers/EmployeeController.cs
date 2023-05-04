@@ -14,7 +14,6 @@ namespace API.Controllers
     public class EmployeeController : GeneralController<IEmployeeRepository, Employee, string>
     {
         public EmployeeController(IEmployeeRepository repository) : base(repository) { }
-        [HttpPost("Register")]
         [HttpPost("Login")]
         public ActionResult Login(LoginVM loginVM)
         {
