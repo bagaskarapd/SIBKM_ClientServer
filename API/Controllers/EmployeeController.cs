@@ -15,32 +15,46 @@ namespace API.Controllers
     {
         public EmployeeController(IEmployeeRepository repository) : base(repository) { }
         [HttpPost("Register")]
-        public ActionResult Register(RegisterVM registerVM)
+        [HttpPost("Login")]
+        public ActionResult Login(LoginVM loginVM)
         {
-            try
+            var login = _repository.Login(loginVM);
+            if (login)
             {
-                var register = _repository.Register(registerVM);
-                if (register > 0)
+                return Ok(new ResponseDataVM<string>
                 {
-                    return Ok(new ResponseDataVM<string>
-                    {
-                        Code = StatusCodes.Status200OK,
-                        Status = HttpStatusCode.OK.ToString(),
-                        Message = "Insert Success",
-                    });
-                }
-            }
-            catch (Exception e)
-            {
-                return BadRequest(new ResponseErrorsVM<string>
-                {
-                    Code = StatusCodes.Status500InternalServerError,
-                    Status = HttpStatusCode.InternalServerError.ToString(),
-                    Errors = "Insert Failed / Lost Connection"
+                    Code = StatusCodes.Status200OK,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Login Success",
                 });
             }
+            return NotFound(new ResponseErrorsVM<string>
+            {
+                Code = StatusCodes.Status404NotFound,
+                Status = HttpStatusCode.NotFound.ToString(),
+                Errors = "Login Failed / account or password not found"
+            });
+        }
+
+        [HttpPost("Register")]
+        public ActionResult Register(RegisterVM registerVM)
+        {
+            var register = _repository.Register(registerVM);
+            if (register > 0)
+            {
+                return Ok(new ResponseDataVM<string>
+                {
+                    Code = StatusCodes.Status200OK,
+                    Status = HttpStatusCode.OK.ToString(),
+                    Message = "Insert Success",
+                });
+            }
+            return BadRequest(new ResponseErrorsVM<string>
+            {
+                Code = StatusCodes.Status500InternalServerError,
+                Status = HttpStatusCode.InternalServerError.ToString(),
+                Errors = "Insert Failed / Lost Connection"
+            });
         }
     }
 }
-
-
