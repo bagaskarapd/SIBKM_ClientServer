@@ -1,4 +1,5 @@
 ﻿using API.Context;
+using API.Handlers;
 using API.Models;
 using API.Repositories.Interface;
 using API.ViewModels;
@@ -11,15 +12,23 @@ namespace API.Repositories.Data
         public int Register(RegisterVM registerVM)
         {
             int result = 0;
-            
+
             //insert to universitie table
             var universitie = new Universitie
             {
                 Name = registerVM.UniversitieName,
             };
-            _context.Set<Universitie>().Add(universitie);
-            result = _context.SaveChanges();
-            
+
+            if (_context.Universities.Any(u => u.Name.Contains(registerVM.UniversitieName)))
+            {
+                universitie.Id = _context.Universities.FirstOrDefault(u => u.Name.Contains(registerVM.UniversitieName))!.Id;
+            }
+            else
+            {
+                _context.Set<Universitie>().Add(universitie);
+                result = _context.SaveChanges();
+            }
+
             //insert to education table
             var education = new Education
             {
@@ -50,7 +59,7 @@ namespace API.Repositories.Data
             var account = new Account
             {
                 EmployeeNIK = registerVM.NIK,
-                password = registerVM.password
+                password = Hashing.HashPassword(registerVM.password)
             };
             _context.Set<Account>().Add(account);
             result += _context.SaveChanges();
@@ -68,7 +77,7 @@ namespace API.Repositories.Data
             var accountRole = new AccountRole
             {
                 AccountNik = registerVM.NIK,
-                RoleId = 2
+                RoleId = 1
             };
             _context.Set<AccountRole>().Add(accountRole);
             result += _context.SaveChanges();
@@ -78,27 +87,22 @@ namespace API.Repositories.Data
         public bool Login(LoginVM loginVM)
         {
             //Ambil data dari database berdasarkan Email di tabel employee
-            var employees = _context.Employees.FirstOrDefault(e => e.Email == loginVM.Email);
-            if (employees == null)
+            var getEmployeeAccount = _context.Employees.Join(_context.Accounts,
+                                                     e => e.NIK,
+                                                     a => a.EmployeeNIK,
+                                                     (e, a) => new
+                                                     {
+                                                         Email = e.Email,
+                                                         Password = a.password
+                                                     }).FirstOrDefault(e =>
+                                                                           e.Email == loginVM.Email);
+
+            if (getEmployeeAccount == null)
             {
                 return false;
             }
-            //Gabungkan data dari tabel employee dengan tabel account berdasarkan NIK 
-            var accounts = _context.Accounts.FirstOrDefault(e => e.EmployeeNIK == employees.NIK);
-            if (accounts == null)
-            {
-                return false;
-            }
-            //Cocokan data tersebut dengan Password yang diinputkan
-            if (accounts.password != loginVM.Password)
-            {
-                return false;
-            }
-            return true;
+
+            return Hashing.ValidatePassword(loginVM.Password, getEmployeeAccount.Password);
         }
-        //Cek apakah data valid atau tidak
-
-
-
     }
-    }
+}
