@@ -5,7 +5,6 @@ namespace API.Repositories.Interface
 {
     public interface IEmployeeRepository : IGeneralRepository<Employee, string>
     {
-        int Register(RegisterVM registerVM);
-        bool Login(LoginVM loginVm);
+        string GetFullNameByEmail(string email);
     }
 }
