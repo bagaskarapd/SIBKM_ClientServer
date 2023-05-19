@@ -30,6 +30,20 @@ builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddTransient<ITokenService, TokenService>();
 /*builder.Services.AddScoped(typeof(IGeneralRepository<,>), typeof(GeneralRepository<,,>));
 */
+// Configure CORS
+builder.Services.AddCors(options => {
+    options.AddDefaultPolicy(policy => {
+        policy.AllowAnyOrigin();
+        policy.AllowAnyMethod();
+        policy.AllowAnyHeader();
+    });
+    /*options.AddPolicy("AnotherPolicy", policy => {
+        policy.WithOrigins("https://www.websiteclient.com/");
+        policy.WithMethods("GET", "POST", "PUT");
+        policy.AllowAnyHeader();
+    });*/
+});
+
 // Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
        .AddJwtBearer(options => {
@@ -82,7 +96,6 @@ builder.Services.AddSwaggerGen(x => {
     });
 });
 
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -93,6 +106,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
